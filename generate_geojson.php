@@ -6,15 +6,15 @@
     //generate_ByCategroy("http://localhost", "Food%26Drink");
 
 
-    function generate_ByCategroy($url, $category){
+    function generate_ByCategroy($samtour_url, $category){
         // Curl JSON data from Category
-        $PageInfoQuery = $url . "/api.php?action=query&prop=revisions&rvprop=content&format=json&generator=categorymembers&gcmtitle=Category:" . $category;
+        $PageInfoQuery = $samtour_url . "/api.php?action=query&prop=revisions&rvprop=content&format=json&generator=categorymembers&gcmtitle=Category:" . $category;
         $result= curl_http_get($PageInfoQuery);
 
-        $propertiesArray = parse_queryData($url, $result);
+        $propertiesArray = parse_queryData($samtour_url, $result);
         $featureElements = encode_geojson_features($propertiesArray);
         $geojson = encode_geojson_FeatureCollection($featureElements);
-        write_file_inDownloadDir($url, $category, $geojson);
+        write_file_inDownloadDir($samtour_url, $category, $geojson);
     }
 
 
@@ -24,14 +24,14 @@
         $result = curl_exec($ch);
 
         // if $result is false
-        assert('$result', "curl_http_get():curl failed!");
+        assert('$result', "curl_http_get():curl at $url failed!");
 
         curl_close($ch);
         return $result;
     }
 
 
-    function parse_queryData($url, $result){
+    function parse_queryData($samtour_url, $result){
 
         // Parse the JSON format of  "DataInputForm Template"
         $data = json_decode($result);
@@ -48,7 +48,7 @@
             $temp = explode('|', $dataInputForm);
             //print_r($temp);
 
-            $photoPath = find_imagePath($url, $pageTitle);
+            $photoPath = find_imagePath($samtour_url, $pageTitle);
             $rating = find_rating($pageId);
             $name = $pageTitle;
             $desc = trim(explode('=',$temp[8])[1]);
@@ -97,7 +97,7 @@
 
     function find_imagePath($url, $title) {
         // Create a image of size of 528px
-        $ImageCreateQuery = $url . "/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=528&generator=images&titles=" . $title;
+        $ImageCreateQuery = $url . "/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=528&titles=" . $title;
         $result = curl_http_get($ImageCreateQuery);
 
         //Parse JSON and Extract ImagePath
