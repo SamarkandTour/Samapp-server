@@ -95,9 +95,9 @@
     }
 
 
-    function find_imagePath($url, $title) {
+    function find_imagePath($samtour_url, $title) {
         // Create a image of size of 528px
-        $ImageCreateQuery = $url . "/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=528&titles=" . $title;
+        $ImageCreateQuery = $samtour_url . "/api.php?action=query&prop=pageimages&format=json&piprop=thumbnail&pithumbsize=528&titles=" . $title;
         $result = curl_http_get($ImageCreateQuery);
 
         //Parse JSON and Extract ImagePath
@@ -159,7 +159,7 @@
 
         // Unification of category name
         if($category == "Ovqatlanish" || $category == "Food%26Drink"){
-            $category = "foodndriank";
+            $category = "foodndrink";
         }
         elseif($category == "Mehmoxonalar" || $category == "Hotel"){
             $category = "hotel";
