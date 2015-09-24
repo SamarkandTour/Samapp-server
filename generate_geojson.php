@@ -1,9 +1,10 @@
 <?php
     require __DIR__ . '/vendor/autoload.php';
+    require __DIR__ . 'vote.php';
 
     generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
     //generate_ByCategroy("http://en.samarkandtour.org", "Food%26Drink");
-    //generate_ByCategroy("http://localhost", "Food%26Drink");
+    //generate_ByCategroy("http://uz.localhost", "Food%26Drink");
 
 
     function generate_ByCategroy($samtour_url, $category){
@@ -88,7 +89,7 @@
                 }
             }
 
-            $featureElements[] = array('properties'=>$properties, 'lat'=>$lat, 'long'=>$long);
+            $featureElements[] = array('properties'=>$properties, 'long'=>$long, 'lat'=>$lat);
         }
 
         return $featureElements;
@@ -124,12 +125,6 @@
     }
 
 
-    function find_rating($pageId){
-        $rating = 4;
-        return $rating;
-    }
-
-
     function encode_geojson_features($featureElements){
 
         $count = count($featureElements);
@@ -153,7 +148,7 @@
     }
 
 
-    function write_file_inDownloadDir($url, $category, $geojson){
+    function write_file_inDownloadDir($samtour_url, $category, $geojson){
         $host = parse_url($url)['host'];
         $subdomain = explode('.', $host)[0];
 
