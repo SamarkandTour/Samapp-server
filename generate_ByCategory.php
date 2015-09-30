@@ -41,6 +41,7 @@
 
     function parse_queryData($samtour_url, $category, $result){
         static $featureElements = array();
+        static $total_pages = 0;
 
         // Parse the JSON format of  "DataInputForm Template"
         $data = (array)json_decode($result);
@@ -48,16 +49,19 @@
 
         $pages = $data['query']->pages;
         $array_pages = (array)$pages;
-
-        // Print for notification and debugging
-        $cnt_array_pages = count($array_pages);
-        print_r("Total pages count: {$cnt_array_pages}\n");
+        $total_pages = $total_pages + count($array_pages);
 
         $featureElements = parse_detail($samtour_url, $array_pages, $featureElements);
 
         // If query continuation needs, Requery
-        $query_continue = $data['query-continue'];
-        if (isset($query_continue)){
+        if (array_key_exists('query-continue', $data)){
+            $query_continue = $data['query-continue'];
+        }
+        else{
+            $query_continue = null;
+        }
+
+        if (isset($query_continue)) {
             $gcmcontinue = rawurlencode($query_continue->categorymembers->gcmcontinue); // Should be encoded for http get query string
 
             $ContinuationQuery = $samtour_url . "/api.php?action=query&prop=revisions&rvprop=content&format=json&rawcontinue=&generator=categorymembers&gcmtitle=Category:{$category}&gcmcontinue={$gcmcontinue}";
@@ -65,12 +69,14 @@
 
             //recursive function call
             parse_queryData($samtour_url, $category, $result);
+
+            print_r("Total Pages count: {$total_pages}");
         }
 
         return $featureElements;
     }
 
-    function parse_detail($samtour_url, $array_pages, $featureElements) {
+    function parse_detail($samtour_url, $array_pages, $featureElements){
         foreach ($array_pages as $item){
             $pageId = $item->pageid;
             $pageTitle = $item->title;
@@ -126,7 +132,8 @@
     }
 
 
-    function find_imagePath($samtour_url, $title) {
+    function find_imagePath($samtour_url, $title){
+        $source = null;
         $e_title = rawurlencode($title); //RFC 3986 URL encoding
 
         // Create a image of size of 528px
@@ -159,6 +166,7 @@
 
 
     function encode_geojson_features($featureElements){
+        $features = array();
 
         $count = count($featureElements);
         for ($i = 0; $i < $count; $i++) {
@@ -210,6 +218,6 @@
         }
         fclose($file_handle);
 
-        print_r("\nGenerated {$filename}");
+        print_r("\nGenerated {$filename}\n");
     }
 ?>
