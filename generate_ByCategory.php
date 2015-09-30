@@ -18,7 +18,7 @@
 
 
     function curl_http_get($url){
-        $proxy = "alisher:alisher1990@192.168.254.11:3128";
+        //$proxy = "alisher:alisher1990@192.168.254.11:3128";
 
         $ch = curl_init($url);
         if (isset($proxy)) {
