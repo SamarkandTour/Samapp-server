@@ -2,6 +2,7 @@
     /**
      * Main module for parsing
      */
+    require __DIR__ . '/vote.php';
 
     function generate_ByCategroy($samtour_url, $category){
         print_r("URL: {$samtour_url}, Category: {$category}, ");
@@ -18,7 +19,7 @@
 
 
     function curl_http_get($url){
-        //$proxy = "alisher:alisher1990@192.168.254.11:3128";
+        global $proxy;
 
         $ch = curl_init($url);
         if (isset($proxy)) {
@@ -41,7 +42,7 @@
 
     function parse_queryData($samtour_url, $category, $result){
         static $featureElements = array();
-        static $total_pages = 0;
+        static $total_pages;
 
         // Parse the JSON format of  "DataInputForm Template"
         $data = (array)json_decode($result);
@@ -53,15 +54,10 @@
 
         $featureElements = parse_detail($samtour_url, $array_pages, $featureElements);
 
-        // If query continuation needs, Requery
+        // If there is more data, Requery continually until no more data
+        // This is query-continuation, for more information Visit https://www.mediawiki.org/wiki/API:Query#Continuing_queries
         if (array_key_exists('query-continue', $data)){
             $query_continue = $data['query-continue'];
-        }
-        else{
-            $query_continue = null;
-        }
-
-        if (isset($query_continue)) {
             $gcmcontinue = rawurlencode($query_continue->categorymembers->gcmcontinue); // Should be encoded for http get query string
 
             $ContinuationQuery = $samtour_url . "/api.php?action=query&prop=revisions&rvprop=content&format=json&rawcontinue=&generator=categorymembers&gcmtitle=Category:{$category}&gcmcontinue={$gcmcontinue}";
@@ -71,6 +67,7 @@
             parse_queryData($samtour_url, $category, $result);
 
             print_r("Total Pages count: {$total_pages}");
+            $total_pages = 0;
         }
 
         return $featureElements;
@@ -148,10 +145,18 @@
         $pages = $data['query']->pages;
         $array_pages = (array)$pages;
         foreach ($array_pages as $item){
-            $source = $item->thumbnail->source;
+            if(property_exists($item, 'thumbnail')) {  // If there is no thumbnail property
+                $source = $item->thumbnail->source;
+            }
+            else{
+                $pageId = $item->pageid;
+                die("find_imagePath(): thumbnail property doesn't exist at {$pageId}\n
+                    To update forcely cached link table, Visit https://www.mediawiki.org/wiki/API:Purge");
+            }
         }
         $imagePath = parse_url($source)['path'];
         $imagePath = "w" . $imagePath; // Because all images are stored in uz domin, add physically directory path from this files
+        $imagePath = rawurldecode($imagePath); // Decode URL-encoded string
 
         return $imagePath;
     }
