@@ -7,14 +7,14 @@
      * return: the value of rating
      */
     function find_rating($samtour_url, $page_id) {
-        $host = parse_url($samtour_url)['host'];
-        $subdomain = explode('.', $host)[0];
-
         global $servername;
         global $username;
         global $password;
         global $db;
         global $port;
+
+        $host = parse_url($samtour_url)['host'];
+        $subdomain = explode('.', $host)[0];
 
         switch($subdomain){
             case 'uz':

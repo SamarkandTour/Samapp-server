@@ -4,17 +4,23 @@
      */
     require __DIR__ . '/vote.php';
 
+    $propertiesArray = []; //Global variable
+
     function generate_ByCategroy($samtour_url, $category){
+        global $propertiesArray;
+
         print_r("URL: {$samtour_url}, Category: {$category}, ");
 
         // Curl JSON data from Category. For query continuation, don't miss rawcontinue=
         $PageInfoQuery = $samtour_url . "/api.php?action=query&prop=revisions&rvprop=content&format=json&rawcontinue=&generator=categorymembers&gcmtitle=Category:" . $category;
         $result= curl_http_get($PageInfoQuery);
 
-        $propertiesArray = parse_queryData($samtour_url, $category, $result);
+        parse_queryData($samtour_url, $category, $result);
         $featureElements = encode_geojson_features($propertiesArray);
         $geojson = encode_geojson_FeatureCollection($featureElements);
         write_file_inDownloadDir($samtour_url, $category, $geojson);
+
+        $propertiesArray = []; //Initialize for next geojson creation
     }
 
 
@@ -41,7 +47,6 @@
 
 
     function parse_queryData($samtour_url, $category, $result){
-        static $featureElements = array();
         static $total_pages;
 
         // Parse the JSON format of  "DataInputForm Template"
@@ -52,7 +57,7 @@
         $array_pages = (array)$pages;
         $total_pages = $total_pages + count($array_pages);
 
-        $featureElements = parse_detail($samtour_url, $array_pages, $featureElements);
+        parse_detail($samtour_url, $array_pages);
 
         // If there is more data, Requery continually until no more data
         // This is query-continuation, for more information Visit https://www.mediawiki.org/wiki/API:Query#Continuing_queries
@@ -65,15 +70,15 @@
 
             //recursive function call
             parse_queryData($samtour_url, $category, $result);
-
+        }
+        else {
             print_r("Total Pages count: {$total_pages}");
             $total_pages = 0;
         }
-
-        return $featureElements;
     }
 
-    function parse_detail($samtour_url, $array_pages, $featureElements){
+    function parse_detail($samtour_url, $array_pages){
+        global $propertiesArray;
         foreach ($array_pages as $item){
             $pageId = $item->pageid;
             $pageTitle = $item->title;
@@ -122,10 +127,8 @@
                 }
             }
 
-            $featureElements[] = array('properties'=>$properties, 'long'=>$long, 'lat'=>$lat);
+            $propertiesArray[] = array('properties'=>$properties, 'long'=>$long, 'lat'=>$lat);
         }
-
-        return $featureElements;
     }
 
 

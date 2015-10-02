@@ -3,7 +3,7 @@
     require __DIR__ . '/generate_ByCategory.php';
 
     // Uz
-    //generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
+    generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
 
     // Eng
     generate_ByCategroy("http://en.samarkandtour.org", "Hotel");
