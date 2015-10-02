@@ -179,7 +179,7 @@
         $count = count($featureElements);
         for ($i = 0; $i < $count; $i++) {
             // Generate GeoJSON format
-            $point = new \GeoJson\Geometry\Point([$featureElements[$i]['lat'], $featureElements[$i]['long']]);
+            $point = new \GeoJson\Geometry\Point([$featureElements[$i]['long'], $featureElements[$i]['lat']]);
             $features[] = new \GeoJson\Feature\Feature($point, $featureElements[$i]['properties'], null);
         }
 
