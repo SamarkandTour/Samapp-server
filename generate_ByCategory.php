@@ -202,24 +202,24 @@
         $subdomain = explode('.', $host)[0];
 
         // Unification of category name
-        if($category == "Ovqatlanish" || $category == "Food%26Drink"){
-            $category = "foodndrink";
+        if($category == "Mehmoxonalar" || $category == "Hotel" || $category == "Отели" ){
+            $category = "hotels";
         }
-        elseif($category == "Mehmoxonalar" || $category == "Hotel"){
-            $category = "hotel";
+        elseif($category == "Ovqatlanish" || $category == "Food%26Drink" || $category == "Еда и напиток"){
+            $category = "foodndrinks";
         }
-        elseif($category == "Ziyoratgohlar" || $category == "Attraction"){
-            $category = "attraction";
+        elseif($category == "Ziyoratgohlar" || $category == "Attraction" || $category == "Привлечение"){
+            $category = "attractions";
         }
-        elseif($category == "Xaridlar" || $category == "Shopping"){
-            $category = "shopping";
+        elseif($category == "Xaridlar" || $category == "Shopping" || $category == "Покупка"){
+            $category = "shoppings";
         }
 
         $dtz = new DateTimeZone("Asia/Samarkand");
         $current = new DateTime("now", $dtz);
         $date = $current->format("Ymd");
 
-        $filename = "download/" . $subdomain . '_' . $category . '_' . $date . ".geojson";
+        $filename = "download/" . $subdomain . '_' . $category . ".geojson";
         $file_handle = fopen($filename, "w+");
         if (fwrite($file_handle, $geojson) == FALSE) {
             print_r("Cannot write to file {$filename}");
