@@ -15,6 +15,11 @@
         $PageInfoQuery = $samtour_url . "/api.php?action=query&prop=revisions&rvprop=content&format=json&rawcontinue=&generator=categorymembers&gcmtitle=Category:" . $category;
         $result= curl_http_get($PageInfoQuery);
 
+        if ($result == "[]") {
+            print_r("$category has No data!");
+            return;
+        }
+
         parse_queryData($samtour_url, $category, $result);
         $featureElements = encode_geojson_features($propertiesArray);
         $geojson = encode_geojson_FeatureCollection($featureElements);
@@ -59,7 +64,7 @@
 
         parse_detail($samtour_url, $array_pages);
 
-        // If there is more data, Requery continually until no more data
+        // If there is more data, Re-query continually until no more data
         // This is query-continuation, for more information Visit https://www.mediawiki.org/wiki/API:Query#Continuing_queries
         if (array_key_exists('query-continue', $data)){
             $query_continue = $data['query-continue'];
@@ -79,6 +84,7 @@
 
     function parse_detail($samtour_url, $array_pages){
         global $propertiesArray;
+
         foreach ($array_pages as $item){
             $pageId = $item->pageid;
             $pageTitle = $item->title;
@@ -90,16 +96,52 @@
             $photoPath = find_imagePath($samtour_url, $pageTitle);
             $rating = find_rating($samtour_url, $pageId);
             $name = $pageTitle;
-            $desc = trim(explode('=',$temp[8])[1]);
-            $type = trim(explode('=',$temp[9])[1]);
-            $price = trim(explode('=',$temp[10])[1]);
-            $wifi = trim(explode('=',$temp[11])[1]);
-            $open = trim(explode('=',$temp[12])[1]);
-            $addr = trim(explode('=',$temp[13])[1]);
-            $tel = trim(explode('=',$temp[14])[1]);
-            $url = trim(explode('=',$temp[15])[1]);
-            $gps = trim(explode('=',$temp[16])[1]);
-            $gps = trim(explode("}}", $gps)[0]); // Remove "}}" from $gps
+
+            foreach ($temp as $val) {
+                $trimed = trim(explode('=', $val));
+                switch ($trimed[0]) {
+                    case "DataInputForm":
+                    case "category":
+                    case "image":
+                    case "image2":
+                    case "image3":
+                    case "uz_name":
+                    case "en_name":
+                    case "ru_name":
+                        break;
+                    case "description":
+                        $desc = $trimed[1];
+                        break;
+                    case "type":
+                        $type = $trimed[1];
+                        break;
+                    case "price":
+                        $price = $trimed[1];
+                        break;
+                    case "wifi":
+                        $wifi = $trimed[1];
+                        break;
+                    case "open":
+                        $open = $trimed[1];
+                        break;
+                    case "addr":
+                        $addr = $trimed[1];
+                        break;
+                    case "tel":
+                        $tel = $trimed[1];
+                        break;
+                    case "url":
+                        $url = $trimed[1];
+                        break;
+                    case "gps":
+                        $gps = $trimed[1];
+                        $gps = trim(explode("}}", $gps)[0]); // Remove "}}" from $gps
+                        break;
+                    default:
+                        print_r("$pageTitle has $trimed[0], That's wrong argument!");
+                        break;
+                }
+            }
 
             $properties['photoExt'] = strrchr($photoPath, '.');
             $encoded_image = encode_ImageToBase64($photoPath);
@@ -202,7 +244,7 @@
         $subdomain = explode('.', $host)[0];
 
         // Unification of category name
-        if($category == "Mehmoxonalar" || $category == "Hotel" || $category == "Отели" ){
+        if($category == "Mehmonxonalar" || $category == "Hotel" || $category == "Отели" ){
             $category = "hotels";
         }
         elseif($category == "Ovqatlanish" || $category == "Food%26Drink" || $category == "Еда и напиток"){
@@ -212,7 +254,7 @@
             $category = "attractions";
         }
         elseif($category == "Xaridlar" || $category == "Shopping" || $category == "Покупка"){
-            $category = "shoppings";
+            $category = "shopping";
         }
 
         $dtz = new DateTimeZone("Asia/Samarkand");

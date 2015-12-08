@@ -3,10 +3,10 @@
     require __DIR__ . '/generate_ByCategory.php';
 
     // Uz
+    generate_ByCategroy("http://uz.samarkandtour.org", "Mehmonxonalar");
     generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
-    generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
-    generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
-    generate_ByCategroy("http://uz.samarkandtour.org", "Ovqatlanish");
+    generate_ByCategroy("http://uz.samarkandtour.org", "Ziyoratgohlar");
+    generate_ByCategroy("http://uz.samarkandtour.org", "Xaridlar");
 
     // Eng
     generate_ByCategroy("http://en.samarkandtour.org", "Hotel");
