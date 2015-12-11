@@ -84,6 +84,7 @@
 
     function parse_detail($samtour_url, $array_pages){
         global $propertiesArray;
+        $photoPath = $rating = $name = $desc = $type = $price = $wifi = $open = $address = $tel = $url = $gps = "";
 
         foreach ($array_pages as $item){
             $pageId = $item->pageid;
@@ -99,7 +100,11 @@
 
             foreach ($temp as $val) {
                 $splits = explode('=', $val);
-                $trimed = trim($splits[1]);
+                if (sizeof($splits) > 1) { // In case the property has value
+                    $trimed = trim($splits[1]);
+                } else {
+                    $trimed = "";
+                }
 
                 if ($trimed != "") {
                     switch (trim($splits[0])) {
@@ -122,7 +127,7 @@
                             break;
                         case "wifi":
                             $isWifi = strtolower($trimed);
-                            if ($isWifi == "yes" || $isWifi == "bor" || $wifi == " eсть") {
+                            if ($isWifi == "yes" || $isWifi == "bor" || $isWifi == " eсть") {
                                 $wifi = "yes";
                             } else {
                                 $wifi = $trimed;
@@ -131,7 +136,7 @@
                         case "open":
                             $open = $trimed;
                             break;
-                        case "addr":
+                        case "address":
                             $addr = $trimed;
                             break;
                         case "tel":
@@ -178,6 +183,12 @@
                 }
             }
 
+            if ($lat == 0 || $long == 0) { // If $gps has no value, don't send it to mobile!
+                print_r("Warning! $pageTitle has wrong gps property!\n
+                 In case of wrong gps, the page will not be included to geojson file\n");
+                continue;
+            }
+
             $propertiesArray[] = array('properties'=>$properties, 'long'=>$long, 'lat'=>$lat);
         }
     }
@@ -204,9 +215,12 @@
             }
             else{ // If there is no thumbnail property
                 $pageId = $item->pageid;
-                die("find_imagePath(): thumbnail property doesn't exist at {$pageId}\n
+                print_r("find_imagePath(): thumbnail property of {$title} doesn't exist at pageId:{$pageId}\n
                     1. Check if the image really exist
-                    2. If 1 is not, Try update forcibly cached link table, Visit https://www.mediawiki.org/wiki/API:Purge\n");
+                    2. If first reason is not, Try update forcibly cached link table by below command:\n
+                    api.php?action=purge&titles={$e_title}&forcelinkupdate\n
+                    For more information, Visit https://www.mediawiki.org/wiki/API:Purge\n");
+                return;
             }
         }
         $imagePath = parse_url($source)['path'];
