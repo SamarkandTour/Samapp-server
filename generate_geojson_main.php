@@ -1,6 +1,9 @@
 <?php
     require __DIR__ . '/vendor/autoload.php';
-    require __DIR__ . '/generate_ByCategory.php';
+    require __DIR__ . '/generate_geojson_sub.php';
+
+    // Test code for localhost
+    //generate_ByCategroy("http://uz.localhost", "Food%26Drink");
 
     // Uz
     generate_ByCategroy("http://uz.samarkandtour.org", "Mehmonxonalar");

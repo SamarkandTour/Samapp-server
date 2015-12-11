@@ -16,7 +16,7 @@
         $result= curl_http_get($PageInfoQuery);
 
         if ($result == "[]") {
-            print_r("$category has No data!");
+            print_r("$category has No data!\n");
             return;
         }
 
@@ -77,7 +77,7 @@
             parse_queryData($samtour_url, $category, $result);
         }
         else {
-            print_r("Total Pages count: {$total_pages}");
+            print_r("Total Pages count: {$total_pages}\n");
             $total_pages = 0;
         }
     }
@@ -98,49 +98,58 @@
             $name = $pageTitle;
 
             foreach ($temp as $val) {
-                $trimed = trim(explode('=', $val));
-                switch ($trimed[0]) {
-                    case "DataInputForm":
-                    case "category":
-                    case "image":
-                    case "image2":
-                    case "image3":
-                    case "uz_name":
-                    case "en_name":
-                    case "ru_name":
-                        break;
-                    case "description":
-                        $desc = $trimed[1];
-                        break;
-                    case "type":
-                        $type = $trimed[1];
-                        break;
-                    case "price":
-                        $price = $trimed[1];
-                        break;
-                    case "wifi":
-                        $wifi = $trimed[1];
-                        break;
-                    case "open":
-                        $open = $trimed[1];
-                        break;
-                    case "addr":
-                        $addr = $trimed[1];
-                        break;
-                    case "tel":
-                        $tel = $trimed[1];
-                        break;
-                    case "url":
-                        $url = $trimed[1];
-                        break;
-                    case "gps":
-                        $gps = $trimed[1];
-                        $gps = trim(explode("}}", $gps)[0]); // Remove "}}" from $gps
-                        break;
-                    default:
-                        print_r("$pageTitle has $trimed[0], That's wrong argument!");
-                        break;
+                $splits = explode('=', $val);
+                $trimed = trim($splits[1]);
+
+                if ($trimed != "") {
+                    switch (trim($splits[0])) {
+                        case "category":
+                        case "image":
+                        case "image2":
+                        case "image3":
+                        case "uz_name":
+                        case "en_name":
+                        case "ru_name":
+                            break;
+                        case "description":
+                            $desc = $trimed;
+                            break;
+                        case "type":
+                            $type = $trimed;
+                            break;
+                        case "price":
+                            $price = $trimed;
+                            break;
+                        case "wifi":
+                            $isWifi = strtolower($trimed);
+                            if ($isWifi == "yes" || $isWifi == "bor" || $wifi == " eсть") {
+                                $wifi = "yes";
+                            } else {
+                                $wifi = $trimed;
+                            }
+                            break;
+                        case "open":
+                            $open = $trimed;
+                            break;
+                        case "addr":
+                            $addr = $trimed;
+                            break;
+                        case "tel":
+                            $tel = $trimed;
+                            break;
+                        case "url":
+                            $url = $trimed;
+                            break;
+                        case "gps":
+                            $gps = $trimed;
+                            $gps = trim(explode("}}", $gps)[0]); // Remove "}}" from $gps
+                            break;
+                        default:
+                            print_r("$pageTitle has $trimed, That's wrong property!\n");
+                            break;
+                    }
                 }
+
             }
 
             $properties['photoExt'] = strrchr($photoPath, '.');
@@ -159,7 +168,7 @@
 
             //Decompose $gps for Point format
             $lat = $long = 0;
-            if($gps != null) {
+            if($gps != "") {
                 $fields = explode(",", $gps);
                 if ($fields[0] != null) {
                     $long = (float)trim($fields[0]);
@@ -190,13 +199,14 @@
         $pages = $data['query']->pages;
         $array_pages = (array)$pages;
         foreach ($array_pages as $item){
-            if(property_exists($item, 'thumbnail')) {  // If there is no thumbnail property
+            if(property_exists($item, 'thumbnail')) {
                 $source = $item->thumbnail->source;
             }
-            else{
+            else{ // If there is no thumbnail property
                 $pageId = $item->pageid;
                 die("find_imagePath(): thumbnail property doesn't exist at {$pageId}\n
-                    To update forcely cached link table, Visit https://www.mediawiki.org/wiki/API:Purge");
+                    1. Check if the image really exist
+                    2. If 1 is not, Try update forcibly cached link table, Visit https://www.mediawiki.org/wiki/API:Purge\n");
             }
         }
         $imagePath = parse_url($source)['path'];
@@ -208,8 +218,12 @@
 
 
     function encode_ImageToBase64($imagePath){
-        $image_data=file_get_contents($imagePath);
-        $encoded_image=base64_encode($image_data);
+        $encoded_image = null;
+
+        if ($imagePath != null) {
+            $image_data = file_get_contents($imagePath);
+            $encoded_image = base64_encode($image_data);
+        }
 
         return $encoded_image;
     }
@@ -268,6 +282,6 @@
         }
         fclose($file_handle);
 
-        print_r("\nGenerated {$filename}\n");
+        print_r("Generated {$filename}\n");
     }
 ?>
